@@ -116,6 +116,13 @@ def generate_person_birth_date(is_adult, is_student):
     return birth_date.strftime("%Y-%m-%d")
 
 
+def generate_person_address(performs):
+    if not performs:
+        if random.random() < 0.25:
+            return ""
+    return generate_address()
+
+
 def generate_person_emails(person_id, n):
     result = []
     for i in range(n):
@@ -144,7 +151,9 @@ _instruments = [
     "鼓",
 ]
 
-def generate_person_instruments(roles):
+def generate_person_instruments(roles, performs):
+    if not performs:
+        return []
     global _instruments
     l = 1 if "music" in roles else 0
     result = random.sample(_instruments, random.randint(l, 3))
@@ -156,18 +165,20 @@ class Person:
         self.id = generate_person_id()
         self.name = generate_person_name()
         self.birth_date = generate_person_birth_date(is_adult, is_student)
-        self.address = generate_address()
+        self.address = generate_person_address(performs)
 
         if is_adult:
             self.phones = generate_phones(random.randint(1, 2))
             self.emails = generate_person_emails(self.id, random.randint(0, 2))
             self.roles = generate_person_roles(performs)
-            self.instruments = generate_person_instruments(self.roles)
+            self.instruments = generate_person_instruments(
+                self.roles, performs)
         else:
             self.phones = generate_phones(random.randint(0, 1))
             self.emails = generate_person_emails(self.id, random.randint(0, 1))
             self.roles = ["dance"] if performs else []
-            self.instruments = generate_person_instruments(self.roles)
+            self.instruments = generate_person_instruments(
+                self.roles, performs)
 
     def to_code(self):
         return (
@@ -183,6 +194,64 @@ class Person:
             childs.append(child)
             households.append((self.id, child.id))
         return childs
+
+
+def generate_performances(groups):
+    performances = []
+    dates = [
+        "2022-08-20", "2022-08-21",
+        "2023-08-20", "2023-08-21",
+        "2024-08-20", "2024-08-21",
+    ]
+    time_slots = [
+        "10:00", "11:00", "12:00",
+        "15:00", "16:00", "17:00", "18:00",
+    ]
+    section_id_outside = [
+        "SC001", "SC002", "SC003", "SC004",
+    ]
+    section_id_inside = [
+        "SC005", "SC006", "SC007", "SC008",
+        "SC009", "SC010", "SC011",
+    ]
+    _performance_id = 1
+    for date in dates:
+        for time_slot in time_slots:
+            is_outside = ...
+            section_ids = ...
+            if "-08-20" in date:
+                is_outside = True
+                section_ids = section_id_outside
+            else:
+                is_outside = False
+                section_ids = section_id_inside
+            for section_id in section_ids:
+                k = 3 if is_outside else 1
+                for group_id in random.sample(groups, random.randint(1, k)):
+                    performance_id = f"PF{_performance_id:06d}"
+                    performances.append(
+                        (performance_id, date, time_slot, group_id, section_id)
+                    )
+                    _performance_id += 1
+    return performances
+
+
+def generate_reservations(spectators, performances):
+    reservations = []
+    for performance in performances:
+        performance_id, date, _, _, _ = performance
+        if "-08-21" not in date:
+            continue
+        for spectator in random.sample(spectators, random.randint(1, 5)):
+            _date = datetime.datetime.strptime(date, "%Y-%m-%d")
+            secs = random.randint(24*60*60, 30*24*60*60)
+            res_datetime = _date - datetime.timedelta(seconds=secs)
+            res_date = res_datetime.strftime("%Y-%m-%d")
+            res_time = res_datetime.strftime("%H:%M:%S")
+            reservations.append(
+                (spectator.id, performance_id, res_date, res_time)
+            )
+    return reservations
 
 
 if __name__ == "__main__":
@@ -237,6 +306,19 @@ if __name__ == "__main__":
         for _group_id in random.sample(range(1, 8 + 1), random.randint(1, 2)):
             group_id = f"GP{_group_id:03d}"
             persons_groups.append((person.id, group_id))
+
+    groups = [f"GP{i:03d}" for i in range(1, 8 + 1)]
+    performances = generate_performances(groups)
+
+    spectators = []
+    for _ in range(100):
+        is_adult = random.choice([True, True, True, False])
+        spectator = Person(is_adult=is_adult, performs=False)
+        spectators.append(spectator)
+
+    reservations = generate_reservations(spectators, performances)
+
+    persons.extend(spectators)
 
     phones = []
     emails = []
@@ -307,6 +389,31 @@ if __name__ == "__main__":
         represented_by_str += f"{group_id} {representative}\n"
     with open("represented_by.txt", "w", encoding="utf-8") as f:
         f.write(represented_by_str)
+
+    performances_str = ""
+    for performance in performances:
+        performance_id, date, time_slot, group_id, section_id = performance
+        tmp = (
+            "INSERT INTO performances VALUES "
+            f"('{performance_id}', '{date}', '{time_slot}', '{group_id}', "
+            f"'{section_id}');"
+        )
+        performances_str += tmp
+        performances_str += "\n"
+    with open("performances.txt", "w", encoding="utf-8") as f:
+        f.write(performances_str)
+
+    reservations_str = ""
+    for reservation in reservations:
+        reserved_by, performance_id, date, time = reservation
+        tmp = (
+            "INSERT INTO reservations VALUES "
+            f"('{reserved_by}', '{performance_id}', '{date}', '{time}');"
+        )
+        reservations_str += tmp
+        reservations_str += "\n"
+    with open("reservations.txt", "w", encoding="utf-8") as f:
+        f.write(reservations_str)
 
     persons_groups_str = ""
     for person_id, group_id in persons_groups:
