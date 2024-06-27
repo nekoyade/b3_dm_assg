@@ -123,3 +123,25 @@ CREATE TABLE persons_groups (
     FOREIGN KEY (person_id) REFERENCES persons (id),
     FOREIGN KEY (group_id) REFERENCES groups (id)
 );
+
+
+/* Views */
+
+DROP VIEW regular_groups;
+DROP VIEW corporate_groups;
+DROP VIEW student_groups;
+
+CREATE VIEW regular_groups AS
+    SELECT *
+        FROM groups g
+        WHERE g.type = 'regular';
+
+CREATE VIEW corporate_groups AS
+    SELECT *
+        FROM groups g
+        WHERE g.type = 'corporate';
+
+CREATE VIEW student_groups AS
+    SELECT *
+        FROM groups g
+        WHERE g.type = 'student';
