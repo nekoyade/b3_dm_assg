@@ -305,7 +305,9 @@ if __name__ == "__main__":
     for person in random.sample(persons, len(persons)//5):
         for _group_id in random.sample(range(1, 8 + 1), random.randint(1, 2)):
             group_id = f"GP{_group_id:03d}"
-            persons_groups.append((person.id, group_id))
+            tmp = (person.id, group_id)
+            if tmp not in persons_groups:
+                persons_groups.append((person.id, group_id))
 
     groups = [f"GP{i:03d}" for i in range(1, 8 + 1)]
     performances = generate_performances(groups)
@@ -415,11 +417,22 @@ if __name__ == "__main__":
     with open("reservations.txt", "w", encoding="utf-8") as f:
         f.write(reservations_str)
 
+    households_str = ""
+    for parent_id, child_id in households:
+        tmp = (
+            "INSERT INTO households VALUES ("
+            f"'{parent_id}', '{child_id}');"
+        )
+        households_str += tmp
+        households_str += "\n"
+    with open("households.txt", "w", encoding="utf-8") as f:
+        f.write(households_str)
+
     persons_groups_str = ""
     for person_id, group_id in persons_groups:
         tmp = (
             "INSERT INTO persons_groups VALUES ("
-            f"{person_id}, {group_id});"
+            f"'{person_id}', '{group_id}');"
         )
         persons_groups_str += tmp
         persons_groups_str += "\n"
