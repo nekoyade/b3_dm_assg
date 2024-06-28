@@ -8,18 +8,32 @@
 PRAGMA foreign_keys = true;
 
 
-/* Tables */
+/* Initialization */
 
-DROP TABLE persons;
+DROP VIEW dancers;
+DROP VIEW players;
+DROP VIEW performers;
+DROP VIEW spectators;
+DROP VIEW regular_groups;
+DROP VIEW corporate_groups;
+DROP VIEW student_groups;
+
+DROP TABLE households;
+DROP TABLE persons_groups;
+
+DROP TABLE reservations;
+DROP TABLE performances;
+DROP TABLE sections;
+DROP TABLE venues;
+DROP TABLE groups;
 DROP TABLE phones;
 DROP TABLE emails;
 DROP TABLE roles;
 DROP TABLE instruments;
-DROP TABLE groups;
-DROP TABLE venues;
-DROP TABLE sections;
-DROP TABLE performances;
-DROP TABLE reservations;
+DROP TABLE persons;
+
+
+/* Tables */
 
 CREATE TABLE persons (
     id VARCHAR PRIMARY KEY,
@@ -82,12 +96,11 @@ CREATE TABLE sections (
 );
 
 CREATE TABLE performances (
-    id VARCHAR,
+    id VARCHAR PRIMARY KEY,
     date VARCHAR,
     time_slot VARCHAR,
     group_id VARCHAR,
     section_id VARCHAR,
-    PRIMARY KEY (id, date, time_slot, group_id, section_id),
     FOREIGN KEY (group_id) REFERENCES groups (id),
     FOREIGN KEY (section_id) REFERENCES sections (id)
 );
@@ -104,9 +117,6 @@ CREATE TABLE reservations (
 
 
 /* Join tables */
-
-DROP TABLE households;
-DROP TABLE persons_groups;
 
 CREATE TABLE households (
     parent_id VARCHAR,
@@ -127,9 +137,27 @@ CREATE TABLE persons_groups (
 
 /* Views */
 
-DROP VIEW regular_groups;
-DROP VIEW corporate_groups;
-DROP VIEW student_groups;
+CREATE VIEW performers AS
+    SELECT DISTINCT p.id, p.name, p.birth_date, p.address
+        FROM persons p
+        JOIN persons_groups j ON p.id = j.person_id;
+
+CREATE VIEW dancers AS
+    SELECT DISTINCT d.id, d.name, d.birth_date, d.address
+        FROM performers d
+        JOIN roles r ON d.id = r.person_id
+        WHERE r.role = 'dance';
+
+CREATE VIEW players AS
+    SELECT DISTINCT p.id, p.name, p.birth_date, p.address
+        FROM performers p
+        JOIN roles r ON p.id = r.person_id
+        WHERE r.role = 'music';
+
+CREATE VIEW spectators AS
+    SELECT DISTINCT s.id, s.name, s.birth_date, s.address
+        FROM persons s
+        JOIN reservations r ON s.id = r.reserved_by;
 
 CREATE VIEW regular_groups AS
     SELECT *
