@@ -27,7 +27,14 @@ def close_connection(exception: Optional[BaseException]) -> None:
 
 @app.route("/")
 def index() -> str:
-    return render_template("index.html")
+    return render_template("/index.html")
+
+
+@app.route("/groups/groups")
+def groups_groups() -> str:
+    cur = get_db().cursor()
+    group_list = cur.execute("SELECT id, name FROM groups").fetchall()
+    return render_template("/groups/groups.html", groups=group_list)
 
 
 if __name__ == "__main__":

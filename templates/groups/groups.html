@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>XCAA-DB | 参加連の一覧</title>
+  </head>
+  <body>
+    <h2>参加連の一覧</h2>
+
+    <p>
+      <table>
+        <tbody>
+          {% for group in groups %}
+          <tr>
+            <th scope="row">{{group.name}}</th>
+            <td>詳細</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </p>
+
+    <p>
+      <a href="{{url_for('index')}}">ホームに戻る</a>
+    </p>
+  </body>
+</html>
