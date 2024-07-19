@@ -37,5 +37,25 @@ def groups_groups() -> str:
     return render_template("/groups/groups.html", groups=group_list)
 
 
+@app.route("/groups/group/<id>")
+def groups_group(id: str) -> str:
+    cur = get_db().cursor()
+    group = cur.execute("SELECT * FROM groups WHERE id = ?", (id,)).fetchone()
+    if group is None:
+        return render_template("/groups/group-not-found.html")
+    representer = cur.execute(
+        "SELECT * FROM persons p"
+        "    JOIN groups g ON p.id = g.represented_by"
+        "    WHERE g.id = ?", (id,)).fetchone()
+    persons = cur.execute(
+        "SELECT * FROM persons p"
+        "    JOIN persons_groups j ON p.id = j.person_id"
+        "    JOIN groups g ON j.group_id = g.id"
+        "    WHERE g.id = ?", (id,)).fetchall()
+    return render_template(
+        "/groups/group.html", group=group, representer=representer,
+        persons=persons)
+
+
 if __name__ == "__main__":
     app.run()

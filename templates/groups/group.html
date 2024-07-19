@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{group.name}} - 詳細 | XCAA-DB</title>
+  </head>
+  <body>
+    <h2>{{group.name}} - 詳細</h2>
+
+    <h3>基本情報</h3>
+
+    <p>
+      <table>
+        <tbody>
+          <tr>
+            <th scope="row">名称</th>
+            <td>{{group.name}}</td>
+          </tr>
+          <tr>
+            <th scope="row">本部</th>
+            <td>{{group.address}}</td>
+          </tr>
+          {% if group.email %}
+          <tr>
+            <th scope="row">メールアドレス</th>
+            <td>{{group.email}}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">代表者</th>
+            <td>{{representer.name}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </p>
+
+    <h3>参加者一覧</h3>
+
+    <p>
+      <table>
+        <tbody>
+          {% for person in persons %}
+          <tr>
+            <th>{{person.name}}</th>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </p>
+
+    <p>
+      <a href="{{url_for('groups_groups')}}">参加連の一覧</a><br/>
+      <a href="{{url_for('index')}}">ホームに戻る</a>
+    </p>
+  </body>
+</html>

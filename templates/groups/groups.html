@@ -2,7 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>XCAA-DB | 参加連の一覧</title>
+    <title>参加連の一覧 | XCAA-DB</title>
   </head>
   <body>
     <h2>参加連の一覧</h2>
@@ -13,7 +13,7 @@
           {% for group in groups %}
           <tr>
             <th scope="row">{{group.name}}</th>
-            <td>詳細</td>
+            <td><a href="{{url_for('groups_group', id=group.id)}}">詳細</a></td>
           </tr>
           {% endfor %}
         </tbody>
