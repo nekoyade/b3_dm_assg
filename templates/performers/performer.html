@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>参加者 - 詳細 | XCAA-DB</title>
+  </head>
+  <body>
+    <h2>{{performer.name}} - 詳細</h2>
+
+    <h3>基本情報</h3>
+    <p>
+      <table>
+        <tbody>
+          <tr>
+            <th scope="row">氏名</th>
+            <td>{{performer.name}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </p>
+
+    <h3>役割</h3>
+    <p>
+      <table>
+        <tbody>
+          {% for role in roles %}
+          <tr>
+            <td>{{role.role}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </p>
+
+    <h3>演奏可能楽器</h3>
+    <p>
+      <table>
+        <tbody>
+          {% for instrument in instruments %}
+          <tr>
+            <td>{{instrument.instrument}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </p>
+
+    <h3>参加している連の一覧</h3>
+    <p>
+      <table>
+        <tbody>
+          {% for group in groups %}
+          <tr>
+            <th scope="row">{{group.name}}</th>
+            <td><a href="{{url_for('groups_group', id=group.id)}}">詳細</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </p>
+
+    <p>
+      <a href="{{url_for('performers_performers')}}">参加者の一覧</a><br/>
+      <a href="{{url_for('index')}}">ホームに戻る</a>
+    </p>
+  </body>
+</html>

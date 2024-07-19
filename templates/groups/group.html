@@ -8,7 +8,6 @@
     <h2>{{group.name}} - 詳細</h2>
 
     <h3>基本情報</h3>
-
     <p>
       <table>
         <tbody>
@@ -30,18 +29,24 @@
             <th scope="row">代表者</th>
             <td>{{representer.name}}</td>
           </tr>
+          {% if group.sponsor %}
+          <tr>
+            <th scope="row">後援</th>
+            <td>{{group.sponsor}}</td>
+          </tr>
+          {% endif %}
         </tbody>
       </table>
     </p>
 
     <h3>参加者一覧</h3>
-
     <p>
       <table>
         <tbody>
           {% for person in persons %}
           <tr>
             <th>{{person.name}}</th>
+            <td><a href="{{url_for('performers_performer', id=person.id)}}">詳細</a></td>
           </tr>
           {% endfor %}
         </tbody>
