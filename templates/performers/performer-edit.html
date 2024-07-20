@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>参加者 - 基本情報の編集 | XCAA-DB</title>
+  </head>
+  <body>
+    <h2>{{performer.name}} - 基本情報の編集</h2>
+
+    <p>
+      <form method="POST" action="{{url_for('performers_performer_edit', id=performer.id)}}">
+        氏名：<input type="text" name="name" value="{{performer.name}}"><br />
+        生年月日：<input type="date" name="birth_date" value="{{performer.birth_date}}"><br />
+        住所：<input type="text" name="address" value="{{performer.address}}"><br />
+        <input type="submit" value="決定">
+      </form>
+    </p>
+
+    <p>
+      <a href="{{url_for('performers_performer', id=performer.id)}}"></a>参加者の詳細<br/>
+      <a href="{{url_for('performers_performers')}}">参加者の一覧</a><br/>
+      <a href="{{url_for('index')}}">ホームに戻る</a>
+    </p>
+  </body>
+</html>

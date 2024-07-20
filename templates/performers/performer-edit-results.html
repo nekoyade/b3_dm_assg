@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>参加者 - 基本情報の編集 - 結果 | XCAA-DB</title>
+  </head>
+  <body>
+    <h2>
+      {% if performer %}
+        {{performer.name}} -
+      {% endif %}
+      基本情報の編集 - 結果
+    </h2>
+
+    <p>
+      {{results}}
+    </p>
+
+    <p>
+      {% if performer %}
+        <a href="{{url_for('performers_performer', id=performer.id)}}"></a>参加者の詳細<br/>
+      {% endif %}
+      <a href="{{url_for('performers_performers')}}">参加者の一覧</a><br/>
+      <a href="{{url_for('index')}}">ホームに戻る</a>
+    </p>
+  </body>
+</html>

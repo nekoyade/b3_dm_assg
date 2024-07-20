@@ -1,13 +1,34 @@
 import sqlite3
 from typing import Final, Optional
+import unicodedata
 
-from flask import Flask, g, render_template, request
+from flask import Flask, g, redirect, render_template, request, url_for
 
 
 DATABASE: Final[str] = "database/awaodori.db"
 
 
 app = Flask(__name__)
+
+
+RESULT_MESSAGES: Final[dict[str, str]] = {
+    "performer-id-does-not-exist":
+        "指定された ID の参加者が存在しません．",
+    "name-has-control-characters":
+        "指定された氏名が制御文字を含んでいるため，"
+        "除外してください．",
+    "address-has-control-characters":
+        "指定された住所が制御文字を含んでいるため，"
+        "除外してください．",
+    "database-error":
+        "データベース上でエラーが発生しました．",
+    "updated":
+        "更新が完了しました．",
+}
+
+
+def has_control_characters(s: str) -> bool:
+    return any(map(lambda c: unicodedata.category(c) == "Cc", s))
 
 
 def get_db() -> sqlite3.Connection:
@@ -112,6 +133,63 @@ def performers_performer(id: str) -> str:
         roles=roles,
         instruments=instruments,
         groups=groups)
+
+
+@app.route("/performers/performer-edit/<id>")
+def performers_performer_edit(id: str) -> str:
+    cur = get_db().cursor()
+    performer = cur.execute(
+        "SELECT * FROM performers p"
+        "    WHERE p.id = ?", (id,)).fetchone()
+    if performer is None:
+        return render_template(
+            "/performers/performer-edit-results.html",
+            performer=None,
+            results=RESULT_MESSAGES["performer-id-does-not-exist"])
+    return render_template(
+        "/performers/performer-edit.html", performer=performer)
+
+
+@app.route("/performers/performer-edit/<id>", methods=["POST"])
+def performers_performer_edit_update(id: str) -> str:
+    con = get_db()
+    cur = con.cursor()
+    performer = cur.execute(
+        "SELECT * FROM performers p"
+        "    WHERE p.id = ?", (id,)).fetchone()
+    if performer is None:
+        return render_template(
+            "/performers/performer-edit-results.html",
+            performer=None,
+            results=RESULT_MESSAGES["performer-id-does-not-exist"])
+    name = request.form["name"]
+    birth_date = request.form["birth_date"]
+    address = request.form["address"]
+    if has_control_characters(name):
+        return redirect(url_for("performers_performer_edit_results",
+                        code="name-has-control-characters"))
+    if has_control_characters(address):
+        return redirect(url_for("performers_performer_edit_results",
+                        code="address-has-control-characters"))
+    try:
+        cur.execute(
+            "UPDATE persons"
+            "    SET name = ?, birth_date = ?, address = ?"
+            "    WHERE id = ?",
+            (name, birth_date, address, id,))
+    except sqlite3.Error:
+        return redirect(url_for("performers_performer_edit_results",
+                        code="database-error"))
+    con.commit()
+    return redirect(
+        url_for("performers_performer_edit_results", code="updated"))
+
+
+@app.route("/performers/performer-edit-results/<code>")
+def performers_performer_edit_results(code: str) -> str:
+    return render_template(
+        "/performers/performer-edit-results.html",
+        results=RESULT_MESSAGES.get(code, "意図しないコードを受け取りました．"))
 
 
 if __name__ == "__main__":
