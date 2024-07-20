@@ -19,15 +19,43 @@
       </table>
     </p>
 
+    <h3>連絡先</h3>
+    <p>
+      <table>
+        <tbody>
+          <tr>
+            <th>電話</th>
+            {% for phone in phones %}
+            <td>{{phone.phone}}</td>
+            {% endfor %}
+          </tr>
+          {% if emails %}
+          <tr>
+            <th>メールアドレス</th>
+            {% for email in emails %}
+            <td>{{email.email}}</td>
+            {% endfor %}
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </p>
+
     <h3>役割</h3>
     <p>
       <table>
         <tbody>
-          {% for role in roles %}
           <tr>
-            <td>{{role.role}}</td>
+            {% for role in roles %}
+            <td>
+              {% if role.role == 'dance' %}
+              踊り子
+              {% elif role.role == 'music' %}
+              鳴り物
+              {% endif %}
+            </td>
+            {% endfor %}
           </tr>
-          {% endfor %}
         </tbody>
       </table>
     </p>
@@ -36,11 +64,11 @@
     <p>
       <table>
         <tbody>
-          {% for instrument in instruments %}
           <tr>
+            {% for instrument in instruments %}
             <td>{{instrument.instrument}}</td>
+            {% endfor %}
           </tr>
-          {% endfor %}
         </tbody>
       </table>
     </p>

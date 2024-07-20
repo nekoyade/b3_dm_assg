@@ -1,7 +1,7 @@
 import sqlite3
 from typing import Final, Optional
 
-from flask import Flask, g, render_template
+from flask import Flask, g, render_template, request
 
 
 DATABASE: Final[str] = "database/awaodori.db"
@@ -33,8 +33,9 @@ def index() -> str:
 @app.route("/groups/groups")
 def groups_groups() -> str:
     cur = get_db().cursor()
-    groups = cur.execute("SELECT id, name FROM groups").fetchall()
-    return render_template("/groups/groups.html", groups=groups)
+    groups = cur.execute("SELECT * FROM groups").fetchall()
+    return render_template(
+        "/groups/groups.html", groups=groups)
 
 
 @app.route("/groups/group/<id>")
@@ -65,6 +66,16 @@ def performers_performers() -> str:
         "/performers/performers.html", performers=performers)
 
 
+@app.route("/performers/performers", methods=["POST"])
+def performers_performers_filtered() -> str:
+    cur = get_db().cursor()
+    performers = cur.execute(
+        "SELECT * FROM performers p"
+        "    WHERE p.name LIKE ?", (request.form["name_filter"],)).fetchall()
+    return render_template(
+        "/performers/performers.html", performers=performers)
+
+
 @app.route("/performers/performer/<id>")
 def performers_performer(id: str) -> str:
     cur = get_db().cursor()
@@ -72,6 +83,14 @@ def performers_performer(id: str) -> str:
         "SELECT * FROM performers WHERE id = ?", (id,)).fetchone()
     if performer is None:
         return render_template("/performers/performer-not-found.html")
+    phones = cur.execute(
+        "SELECT * FROM phones h"
+        "    JOIN persons p ON h.person_id = p.id"
+        "    WHERE p.id = ?", (id,)).fetchall()
+    emails = cur.execute(
+        "SELECT * FROM emails e"
+        "    JOIN persons p ON e.person_id = p.id"
+        "    WHERE p.id = ?", (id,)).fetchall()
     roles = cur.execute(
         "SELECT * FROM roles r"
         "    JOIN persons p ON r.person_id = p.id"
@@ -86,8 +105,13 @@ def performers_performer(id: str) -> str:
         "    JOIN persons p ON j.person_id = p.id"
         "    WHERE p.id = ?", (id,)).fetchall()
     return render_template(
-        "/performers/performer.html", performer=performer, roles=roles,
-        instruments=instruments, groups=groups)
+        "/performers/performer.html",
+        performer=performer,
+        phones=phones,
+        emails=emails,
+        roles=roles,
+        instruments=instruments,
+        groups=groups)
 
 
 if __name__ == "__main__":

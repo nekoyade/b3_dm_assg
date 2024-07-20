@@ -8,6 +8,13 @@
     <h2>参加者の一覧</h2>
 
     <p>
+      <form method="POST" action="{{url_for('performers_performers_filtered')}}">
+        氏名：<input type="text" name="name_filter" />
+        <input type="submit" value="検索" />
+      </form>
+    </p>
+
+    <p>
       <table>
         <tbody>
           {% for performer in performers %}
