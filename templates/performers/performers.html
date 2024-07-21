@@ -10,8 +10,14 @@
     <p>
       <form method="POST" action="{{url_for('performers_performers_filtered')}}">
         氏名：<input type="text" name="name_filter" />
+        <input type="reset" value="初期値に戻す" />
         <input type="submit" value="検索" />
       </form>
+      ワイルドカードとして "%" を使用可能です．
+    </p>
+
+    <p id="first">
+      <a href="#last">一番下にジャンプ</a>
     </p>
 
     <p>
@@ -25,6 +31,10 @@
           {% endfor %}
         </tbody>
       </table>
+    </p>
+
+    <p id="last">
+      <a href="#first">一番上にジャンプ</a>
     </p>
 
     <p>

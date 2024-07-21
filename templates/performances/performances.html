@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>公演の一覧 | XCAA-DB</title>
+  </head>
+  <body>
+    <h2>公演の一覧</h2>
+
+    <p>
+      <form method="POST" action="{{url_for('performances_performances_filtered')}}">
+        公演日時：<input type="date" name="date_filter" value="{{date_filter_value}}" /><br/>
+        時間枠：<input type="time" name="time_filter" value="{{time_filter_value}}" /><br/>
+        連：<input type="text" name="group_filter_" value="{{group_filter_value}}" /><br/>
+        公演場所：<input type="text" name="venue_filter" value="{{venue_filter_value}}" /><br/>
+        会場：<input type="text" name="section_filter" value="{{section_filter_value}}" /><br/>
+        <input type="reset" value="初期値に戻す" />
+        <input type="submit" value="検索" />
+      </form>
+      ワイルドカードとして "%" を使用可能です．<br/>
+      特定の項目について検索を行う場合は，ほかのすべての項目に "%" を入力してください．<br/>
+      公演日時と時間枠については，初期値がワイルドカードになります．
+    </p>
+
+    <p id="first">
+      <a href="#last">一番下にジャンプ</a>
+    </p>
+
+    <p>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">公演日時</th>
+            <th scope="col">時間枠</th>
+            <th scope="col">連</th>
+            <th scope="col">公演場所</th>
+            <th scope="col">会場</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for performance in performances %}
+          <tr>
+            <td>{{performance.date}}</td>
+            <td>{{performance.time_slot}}</td>
+            <td>{{performance.group_name}}</td>
+            <td>{{performance.venue_name}}</td>
+            <td>{{performance.section_name}}</td>
+            <td><a href="{{url_for('performances_performance', id=performance.id)}}">詳細</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </p>
+
+    <p id="last">
+      <a href="#first">一番上にジャンプ</a>
+    </p>
+
+    <p>
+      <a href="{{url_for('index')}}">ホームに戻る</a>
+    </p>
+  </body>
+</html>

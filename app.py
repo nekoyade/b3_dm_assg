@@ -1,3 +1,4 @@
+import datetime
 import sqlite3
 from typing import Final, Optional
 import unicodedata
@@ -17,6 +18,8 @@ RESULT_MESSAGES: Final[dict[str, str]] = {
     "name-has-control-characters":
         "指定された氏名が制御文字を含んでいるため，"
         "除外してください．",
+    "birth-date-is-invalid":
+        "指定された生年月日の形式が不正です．",
     "address-has-control-characters":
         "指定された住所が制御文字を含んでいるため，"
         "除外してください．",
@@ -25,6 +28,10 @@ RESULT_MESSAGES: Final[dict[str, str]] = {
     "updated":
         "更新が完了しました．",
 }
+
+
+def wild_card_filter(s: str) -> str:
+    return "%" if s == "" else s
 
 
 def has_control_characters(s: str) -> bool:
@@ -77,6 +84,84 @@ def groups_group(id: str) -> str:
     return render_template(
         "/groups/group.html", group=group, representer=representer,
         persons=persons)
+
+
+@app.route("/performances/performances")
+def performances_performances() -> str:
+    cur = get_db().cursor()
+    performances = cur.execute(
+        "SELECT p.id, p.date, p.time_slot, g.name group_name,"
+        "       s.name section_name, v.name venue_name"
+        "    FROM performances p"
+        "    JOIN groups g ON p.group_id = g.id"
+        "    JOIN sections s ON p.section_id = s.id"
+        "    JOIN venues v ON s.venue_id = v.id").fetchall()
+    return render_template(
+        "/performances/performances.html",
+        performances=performances,
+        date_filter_value="",
+        time_filter_value="",
+        group_filter_value="%",
+        venue_filter_value="%",
+        section_filter_value="%")
+
+
+@app.route("/performances/performances", methods=["POST"])
+def performances_performances_filtered() -> str:
+    cur = get_db().cursor()
+    date_filter = wild_card_filter(request.form["date_filter"])
+    time_filter = wild_card_filter(request.form["time_filter"])
+    group_filter = request.form["group_filter_"]
+    venue_filter = request.form["venue_filter"]
+    section_filter = request.form["section_filter"]
+    performances = cur.execute(
+        "SELECT p.id, p.date, p.time_slot, g.name group_name,"
+        "       s.name section_name, v.name venue_name"
+        "    FROM performances p"
+        "    JOIN groups g ON p.group_id = g.id"
+        "    JOIN sections s ON p.section_id = s.id"
+        "    JOIN venues v ON s.venue_id = v.id"
+        "    WHERE   p.date LIKE ?"
+        "        AND p.time_slot LIKE ?"
+        "        AND g.name LIKE ?"
+        "        AND v.name LIKE ?"
+        "        AND s.name LIKE ?",
+        (date_filter,
+         time_filter,
+         group_filter,
+         venue_filter,
+         section_filter)).fetchall()
+    return render_template(
+        "/performances/performances.html",
+        performances=performances,
+        date_filter_value=request.form["date_filter"],
+        time_filter_value=request.form["time_filter"],
+        group_filter_value=request.form["group_filter_"],
+        venue_filter_value=request.form["venue_filter"],
+        section_filter_value=request.form["section_filter"])
+
+
+@app.route("/performances/performance/<id>")
+def performances_performance(id: str) -> str:
+    cur = get_db().cursor()
+    performance = cur.execute(
+        "SELECT p.id, p.date, p.time_slot,"
+        "       g.id group_id, g.name group_name,"
+        "       s.name section_name, v.name venue_name, s.capacity capacity"
+        "    FROM performances p"
+        "    JOIN groups g ON p.group_id = g.id"
+        "    JOIN sections s ON p.section_id = s.id"
+        "    JOIN venues v ON s.venue_id = v.id"
+        "    WHERE p.id = ?", (id,)).fetchone()
+    resevations = cur.execute(
+        "SELECT COUNT(*) FROM reservations r"
+        "    JOIN performances p ON r.performance_id = p.id"
+        "    WHERE p.id = ?", (id,)).fetchall()
+    reservation_count = resevations[0][0]
+    return render_template(
+        "/performances/performance.html",
+        performance=performance,
+        reservation_count=reservation_count)
 
 
 @app.route("/performers/performers")
@@ -168,6 +253,11 @@ def performers_performer_edit_update(id: str) -> str:
     if has_control_characters(name):
         return redirect(url_for("performers_performer_edit_results",
                         code="name-has-control-characters"))
+    try:
+        datetime.datetime.strptime(birth_date, "%Y-%m-%d")
+    except ValueError:
+        return redirect(url_for("performers_performer_edit_results",
+                        code="birth-date-is-invalid"))
     if has_control_characters(address):
         return redirect(url_for("performers_performer_edit_results",
                         code="address-has-control-characters"))
