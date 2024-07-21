@@ -210,6 +210,16 @@ def performers_performer(id: str) -> str:
         "    JOIN persons_groups j ON g.id = j.group_id"
         "    JOIN persons p ON j.person_id = p.id"
         "    WHERE p.id = ?", (id,)).fetchall()
+    parents = cur.execute(
+        "SELECT * FROM persons p"
+        "    JOIN households h ON p.id = h.parent_id"
+        "    JOIN performers e ON h.child_id = e.id"
+        "    WHERE e.id = ?", (id,)).fetchall()
+    childs = cur.execute(
+        "SELECT * FROM persons p"
+        "    JOIN households h ON p.id = h.child_id"
+        "    JOIN performers e ON h.parent_id = e.id"
+        "    WHERE e.id = ?", (id,)).fetchall()
     return render_template(
         "/performers/performer.html",
         performer=performer,
@@ -217,7 +227,9 @@ def performers_performer(id: str) -> str:
         emails=emails,
         roles=roles,
         instruments=instruments,
-        groups=groups)
+        groups=groups,
+        parents=parents,
+        childs=childs)
 
 
 @app.route("/performers/performer-edit/<id>")

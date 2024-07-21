@@ -73,29 +73,73 @@
 
     <h3>演奏可能楽器</h3>
     <p>
-      <table>
-        <tbody>
-          <tr>
-            {% for instrument in instruments %}
-            <td>{{instrument.instrument}}</td>
-            {% endfor %}
-          </tr>
-        </tbody>
-      </table>
+      {% if instruments %}
+        <table>
+          <tbody>
+            <tr>
+              {% for instrument in instruments %}
+              <td>{{instrument.instrument}}</td>
+              {% endfor %}
+            </tr>
+          </tbody>
+        </table>
+      {% else %}
+        なし
+      {% endif %}
     </p>
 
     <h3>参加している連の一覧</h3>
     <p>
-      <table>
-        <tbody>
-          {% for group in groups %}
-          <tr>
-            <th scope="row">{{group.name}}</th>
-            <td><a href="{{url_for('groups_group', id=group.id)}}">詳細</a></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      {% if groups %}
+        <table>
+          <tbody>
+            {% for group in groups %}
+            <tr>
+              <th scope="row">{{group.name}}</th>
+              <td><a href="{{url_for('groups_group', id=group.id)}}">詳細</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        なし
+      {% endif %}
+    </p>
+
+    <h3>保護者</h3>
+    <p>
+      {% if parents %}
+        <table>
+          <tbody>
+            {% for parent in parents %}
+            <tr>
+              <th scope="row">{{parent.name}}</th>
+              <td><a href="{{url_for('performers_performer', id=parent.id)}}">詳細</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        なし
+      {% endif %}
+    </p>
+
+    <h3>子</h3>
+    <p>
+      {% if childs %}
+        <table>
+          <tbody>
+            {% for child in childs %}
+            <tr>
+              <th scope="row">{{child.name}}</th>
+              <td><a href="{{url_for('performers_performer', id=child.id)}}">詳細</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        なし
+      {% endif %}
     </p>
 
     <p>
